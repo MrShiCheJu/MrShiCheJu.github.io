@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小毛同志 生日快乐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Ma Shan Zheng", "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            /* 替换为指定背景图，适配全屏显示 */
+            background: url('https://p3-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/57f08812cb9a4b249aa283f475196647.png~tplv-a9rns2rl98-24:720:720.png?rcl=20260103004411EDB34E4236503259951C&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1767977051&x-signature=kWPaT5CKh%2FmFW2uYw4989JIQeL4%3D') no-repeat center center fixed;
+            background-size: cover;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+            /* 增加背景暗度，让便签文字更清晰 */
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.2);
+                z-index: 1;
+                pointer-events: none;
+            }
+        }
+        
+        /* 便签样式（优化对比度，保证清晰） */
+        .note {
+            position: absolute;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.95); /* 提高不透明度 */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: rotate(var(--rotate, 0deg)) scale(var(--scale, 1));
+            opacity: 0;
+            transition: all 1.2s ease;
+            z-index: 10; /* 高于背景遮罩 */
+            font-size: 15px;
+            line-height: 1.5;
+            color: #222; /* 加深文字颜色 */
+            max-width: 180px;
+        }
+        
+        /* 核心祝福样式（增强视觉对比） */
+        .core-note {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 28px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            font-size: 20px;
+            font-weight: bold;
+            color: #e94560;
+            opacity: 0;
+            transition: all 2s ease;
+            z-index: 100; /* 最高层级 */
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        /* 装饰元素（适配新背景的配色） */
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: confettiFall linear infinite;
+            z-index: 5;
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-10px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+    <!-- 引入书法字体 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="notes-container"></div>
+    <div class="core-note" id="core-note">小毛同志<br>生日快乐 岁岁皆顺遂</div>
+
+    <script>
+        // 自定义配置
+        const config = {
+            name: '小毛同志',
+            notesCount: 80, // 便签数量
+            appearDuration: 6000, // 出现时长(ms)
+            stayDuration: 3000, // 停留时长(ms)
+            disappearDuration: 6000, // 消失时长(ms)
+            coreNoteAppearDelay: 500 // 核心便签出现延迟(ms)
+        };
+
+        // 基础祝福文本库（纯生日祝福）
+        const basicBlessings = [
+            `${config.name}，生日快乐！`,
+            `${config.name}，岁岁皆顺遂，年年皆欢喜`,
+            `福如东海长流水，寿比南山不老松`,
+            `${config.name}，万事兴，长安康`,
+            `今朝祝嘏庆生辰，他日荣华耀门庭`,
+            `${config.name}，平安喜乐，得偿所愿`,
+            `春有百花秋有月，岁岁年年伴君行`,
+            `${config.name}，生辰吉乐，百事从欢`,
+            `嘉辰逢吉旦，福寿永康宁`,
+            `${config.name}，日子滚烫，我们来日方长`,
+            `一岁一礼，一寸欢喜`,
+            `${config.name}，前程似锦绣，万事皆可期`,
+            `举杯敬岁月，落笔皆星河`,
+            `${config.name}，生活明朗，万物可爱`,
+            `愿君常乐无忧，岁岁安澜`,
+            `${config.name}，生辰快乐，四季安康`,
+            `岁月如歌，生辰喜乐`,
+            `${config.name}，所念皆如愿，所行皆坦途`,
+            `天增岁月人增寿，春满乾坤福满门`,
+            `${config.name}，喜乐常伴，无忧长安`,
+            `华岁新添，吉运相伴`,
+            `${config.name}，日日是好日，年年有今朝`,
+            `生辰可喜，未来可期`,
+            `${config.name}，平安顺遂，喜乐无忧`,
+            `松鹤长春，颐养天年`,
+            `${config.name}，岁岁常欢愉，年年皆胜意`,
+            `良辰美景贺生辰，春风得意马蹄疾`,
+            `${config.name}，生活有诗，未来有光`,
+            `福禄寿喜齐聚首，吉祥如意伴君行`,
+            `${config.name}，生辰快乐，万事顺意`
+        ];
+
+        // 直接心意文案（仅保留1句「我喜欢你」，只出现在中间便签）
+        const hiddenHeartTexts = [
+            `我喜欢你`
+        ];
+
+        // 合并祝福库（基础+直接心意）
+        const blessingTexts = [...basicBlessings, ...hiddenHeartTexts];
+
+        // 创建随机颜色（适配水下背景的蓝调色系）
+        const getRandomColor = () => {
+            const colors = ['#e94560', '#ff2e63', '#08d9d6', '#3a86ff', '#8338ec', '#f72585', '#4cc9f0', '#00b4d8'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        };
+
+        // 创建便签
+        const createNotes = () => {
+            const container = document.getElementById('notes-container');
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+
+            // 清空容器
+            container.innerHTML = '';
+
+            // 创建指定数量的便签
+            for (let i = 0; i < config.notesCount; i++) {
+                const note = document.createElement('div');
+                note.className = 'note';
+                
+                // 随机文本（包含基础祝福+1句直接心意）
+                const randomText = blessingTexts[Math.floor(Math.random() * blessingTexts.length)];
+                note.textContent = randomText;
+                
+                // 随机位置
+                const x = Math.random() * (screenWidth - 200) + 10;
+                const y = Math.random() * (screenHeight - 100) + 10;
+                
+                // 随机旋转角度
+                const rotate = (Math.random() - 0.5) * 20;
+                
+                // 随机缩放
+                const scale = 0.8 + Math.random() * 0.4;
+                
+                // 设置样式
+                note.style.left = `${x}px`;
+                note.style.top = `${y}px`;
+                note.style.setProperty('--rotate', `${rotate}deg`);
+                note.style.setProperty('--scale', scale);
+                note.style.color = getRandomColor();
+                
+                // 随机出现延迟
+                const appearDelay = Math.random() * config.appearDuration;
+                
+                // 渐入动画
+                setTimeout(() => {
+                    note.style.opacity = 1;
+                }, appearDelay);
+                
+                container.appendChild(note);
+            }
+        };
+
+        // 隐藏所有便签并显示核心便签
+        const hideNotesAndShowCore = () => {
+            const notes = document.querySelectorAll('.note');
+            const coreNote = document.getElementById('core-note');
+            
+            // 逐个隐藏便签
+            notes.forEach((note, index) => {
+                const delay = Math.random() * config.disappearDuration;
+                setTimeout(() => {
+                    note.style.opacity = 0;
+                    note.style.transform = `rotate(var(--rotate)) scale(0)`;
+                }, delay);
+            });
+            
+            // 显示核心便签（仅生日祝福，无心意文案）
+            setTimeout(() => {
+                coreNote.style.opacity = 1;
+                coreNote.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                
+                // 添加轻微震动效果
+                let scale = 1.2;
+                let direction = -0.02;
+                setInterval(() => {
+                    scale += direction;
+                    if (scale <= 1.1 || scale >= 1.25) {
+                        direction *= -1;
+                    }
+                    coreNote.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                }, 500);
+                
+            }, config.coreNoteAppearDelay);
+        };
+
+        // 创建彩带动画
+        const createConfetti = () => {
+            const container = document.body;
+            const confettiCount = 150;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.setProperty('--color', getRandomColor());
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.animationDuration = `${2 + Math.random() * 3}s`;
+                confetti.style.animationDelay = `${Math.random() * 10}s`;
+                container.appendChild(confetti);
+                
+                // 自动移除
+                setTimeout(() => {
+                    confetti.remove();
+                }, 10000);
+            }
+        };
+
+        // 主流程
+        const init = () => {
+            // 创建便签
+            createNotes();
+            
+            // 创建彩带
+            createConfetti();
+            
+            // 定时隐藏便签并显示核心祝福
+            setTimeout(() => {
+                hideNotesAndShowCore();
+                
+                // 循环彩带效果
+                setInterval(createConfetti, 5000);
+            }, config.appearDuration + config.stayDuration);
+        };
+
+        // 窗口大小适配
+        window.addEventListener('resize', () => {
+            const coreNote = document.getElementById('core-note');
+            coreNote.style.transform = 'translate(-50%, -50%) scale(1.2)';
+        });
+
+        // 初始化
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
